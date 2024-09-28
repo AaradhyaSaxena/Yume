@@ -1,0 +1,9 @@
+data/
+yume_env/
+old/
+.DS_Store
+.ipynb_checkpoints/
+secret.json
+.ipynb
+notebooks/
+__pycache__/
