@@ -13,8 +13,7 @@ def main():
     llm_chain = Chain(df)
     health_analyzer = HealthAnalyzer(llm_chain, df)
     
-    app = APP(health_analyzer)
-    
+    app = APP(df, health_analyzer)
     app.run()
 
 if __name__ == '__main__':
