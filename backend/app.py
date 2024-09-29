@@ -1,13 +1,11 @@
 from flask import Flask, request, jsonify
 import os
 import json
-from health_analyzer import HealthAnalyzer
-import uuid
 import pandas as pd
 class APP:
     def __init__(self, df, health_analyzer):
         self.app = Flask(__name__)
-        self.health_analyzer = health_analyzer()
+        self.health_analyzer = health_analyzer
         self.df = df
         self.config = self.load_config()
         self.port = self.config.get('PORT', 5001)
