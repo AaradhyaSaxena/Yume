@@ -21,6 +21,14 @@ class Chain:
         )
         chain = prompt | self.vision_model 
         return chain.invoke({"image": image})
+    
+    def extract_nutritional_info_meal(self, image):
+        prompt = ChatPromptTemplate.from_template(
+            "Extract all the food items and their calorie intake from this image of a meal."
+            "Provide the output as a string."
+        )
+        chain = prompt | self.vision_model 
+        return chain.invoke({"image": image})
 
     def assess_health_compatibility(self, health_record, nutritional_info):
         prompt = ChatPromptTemplate.from_template(
@@ -66,3 +74,10 @@ class Chain:
             "health_recommendation": recommendations_content
         }
 
+    def process_nutrition_and_health_meal(self, image):
+        if image is None:
+            return "Error: No image provided saunnn "
+        meal_calorie_intake = self.extract_nutritional_info_meal(image)
+        print("meal is :  ", meal_calorie_intake)
+        return meal_calorie_intake
+        

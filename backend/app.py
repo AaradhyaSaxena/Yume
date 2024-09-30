@@ -51,6 +51,22 @@ class APP:
 
             return jsonify(analysis_result)
 
+        @self.app.route('/analyze_meal', methods=['POST'])
+        def analyze_meal():
+            if 'meal_image' not in request.files:
+                return jsonify({"error": "No image file provided"}), 400
+
+            image_file = request.files['meal_image']  # File from frontend
+            user_id = request.form.get('user_id')
+
+            if not user_id:
+                return jsonify({"error": "No user ID provided"}), 400
+
+            # Directly pass the image file and user ID to analyze_product method
+            analysis_result = self.health_analyzer.analyze_meal(image_file, user_id)
+
+            return jsonify(analysis_result)
+
 
         @self.app.route('/user_health/<string:user_id>', methods=['GET'])
         def get_user_health(user_id):
