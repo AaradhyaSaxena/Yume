@@ -24,6 +24,10 @@ if page == "Product Analysis":
             st.error("Please enter your User ID.")
         else:
             try:
+                # Display the uploaded image
+                image = Image.open(uploaded_file)
+                st.image(image, caption="Uploaded Product Image", use_column_width=True)
+
                 # Convert the uploaded file to bytes for sending to the API
                 files = {
                     'image_file': uploaded_file.getvalue(),  # Image file
@@ -31,13 +35,12 @@ if page == "Product Analysis":
                 data = {
                     'user_id': user_id  # User ID
                 }
-                
+
                 # API URL (replace with the actual Flask API URL)
                 api_url = "http://localhost:5001/analyze_product"
 
                 # Send the POST request to Flask API
-                response = requests.post(api_url, files={'image_file': uploaded_file}, data={'user_id': user_id})
-
+                response = requests.post(api_url, files={'image_file': uploaded_file.getvalue()}, data={'user_id': user_id})
                 # Handle the response
                 if response.status_code == 200:
                     result = response.json()
@@ -70,6 +73,10 @@ elif page == "Calorie Intake":
             st.error("Please enter your User ID.")
         else:
             try:
+                # Display the uploaded image
+                meal_image = Image.open(uploaded_meal_image)
+                st.image(meal_image, caption=f"Uploaded {meal_type} Image", use_column_width=True)
+
                 # Convert the uploaded meal image to bytes for sending to the API
                 files = {
                     'meal_image': uploaded_meal_image.getvalue(),  # Meal image

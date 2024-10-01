@@ -39,31 +39,15 @@ class HealthAnalyzer:
         return user_id
     
     def analyze_product(self, image_file, user_id=None):
-        image = self.get_image(image_file)
         health_record = ""; #self.get_user_health_summary(user_id)
-        result = self.chain.process_nutrition_and_health(image, health_record)
+        result = self.chain.process_nutrition_and_health(image_file, health_record)
         print("resulttttt ", result)
         return {"result": result}
     
     def analyze_meal(self, image_file, user_id=None):
-        image = self.get_image(image_file)
-        result = self.chain.process_nutrition_and_health_meal(image)
+        result = self.chain.process_nutrition_and_health_meal(image_file)
         print("resulttttt for meallll ", result)
         return {"result": result}
-
-    # def analyze_product(self, product):
-    #     analysis = {
-    #         "product_id": product['parent_asin'],
-    #         "name": product['title'],
-    #         "nutritional_analysis": self._analyze_nutrition(product),
-    #         "processing_level": self._analyze_processing(product),
-    #         "harmful_ingredients": self._identify_harmful_ingredients(product),
-    #         "diet_compliance": self._check_diet_compliance(product),
-    #         "allergen_info": self._check_allergens(product),
-    #         "misleading_claims": self._check_misleading_claims(product),
-    #         "optimization_suggestions": self._suggest_optimizations(product)
-    #     }
-    #     return analysis
 
     def _analyze_nutrition(self, product):
         # Placeholder for nutritional analysis

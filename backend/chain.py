@@ -5,6 +5,8 @@ from langchain_core.output_parsers import PydanticOutputParser
 from models import NutritionalInfo, HealthRecommendation, NutritionFacts
 from langchain_google_vertexai import VertexAI
 from langchain.schema import AIMessage 
+from PIL import Image
+
 
 class Chain:
     def __init__(self, df):
@@ -16,15 +18,26 @@ class Chain:
 
     def extract_nutritional_info(self, image):
         prompt = ChatPromptTemplate.from_template(
-            "Extract all nutritional information from this image of a nutrition facts table. "
-            "Provide the output as a string."
-        )
-        chain = prompt | self.vision_model 
-        return chain.invoke({"image": image})
+             "From the given image, try to find the nutritional information table and extract the nutritional information."
+             "Image: {image}\n"
+             "If you can't find the nutritional information table, just return a string saying 'No nutritional information found'."
+             "Use the information from the image only, and don't make any assumptions, or add any information, or use any other sources."
+             "Provide the output as a string."
+         )
+        
+        chain = prompt | self.vision_model
+        try:
+            image_content = image.read()
+            if not image_content:
+                return "Error: Empty image file"
+            return chain.invoke({"image": image_content})
+        except Exception as e:
+            return f"Error processing image: {str(e)}"
     
     def extract_nutritional_info_meal(self, image):
         prompt = ChatPromptTemplate.from_template(
-            "Extract all the food items and their calorie intake from this image of a meal."
+            "tell me what do you see in this image? Do you see any food items? "
+            "Image is : {image}"
             "Provide the output as a string."
         )
         chain = prompt | self.vision_model 
@@ -61,6 +74,9 @@ class Chain:
         return chain.invoke({"nutritional_info": nutritional_info})
 
     def process_nutrition_and_health(self, image, health_record):
+        image_content = image.read()
+        if not image_content:
+            return "Error: No image provided saunnn "
         nutritional_info = self.extract_nutritional_info(image)
         print("checking reccomendations   ", nutritional_info)
         #recommendation = self.assess_health_compatibility(health_record, nutritional_info)
@@ -75,7 +91,7 @@ class Chain:
         }
 
     def process_nutrition_and_health_meal(self, image):
-        if image is None:
+        if image.read() is None:
             return "Error: No image provided saunnn "
         meal_calorie_intake = self.extract_nutritional_info_meal(image)
         print("meal is :  ", meal_calorie_intake)

@@ -42,7 +42,7 @@ class APP:
 
             image_file = request.files['image_file']  # File from frontend
             user_id = request.form.get('user_id')
-
+       
             if not user_id:
                 return jsonify({"error": "No user ID provided"}), 400
 
