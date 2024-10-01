@@ -2,9 +2,10 @@ from flask import Flask, request, jsonify
 import json
 import pandas as pd
 class APP:
-    def __init__(self, health_analyzer):
+    def __init__(self, health_analyzer, search):
         self.app = Flask(__name__)
         self.health_analyzer = health_analyzer
+        self.search = search
         self.df = pd.read_csv('data/user_data.csv')
         self.config = self.load_config()
         self.port = self.config.get('PORT', 5001)
@@ -82,6 +83,13 @@ class APP:
                 return jsonify({"error": "User with this phone number already exists"}), 409
             new_user = self.health_analyzer.create_user(name, phone, email)
             return jsonify(new_user)
+        
+        @self.app.route('/search', methods=['GET'])
+        def search():
+            keyword = request.args.get('keyword')
+            columns = request.args.get('columns', ['Food'])
+            result = self.search.search(keyword, columns)
+            return result
 
     def run(self):
         self.app.run(port=self.port)

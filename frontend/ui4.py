@@ -87,19 +87,25 @@ def dashboard_tab(user_id):
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
+def daily_goals_tab(user_id):
+    st.write("Welcome to the Daily Goals")
+
 def main():
     st.title("YuMe")
     
     user_id = st.text_input("Enter your User ID")
 
     # Create tabs
-    tab1, tab2 = st.tabs(["Analyze Product", "User Profile"])
+    tab1, tab2, tab3 = st.tabs(["Analyze Product", "User Profile", "Daily goals"])
     
     with tab1:
         scan_tab(user_id)
     
     with tab2:
         dashboard_tab(user_id)
+
+    with tab3:
+        daily_goals_tab(user_id)
 
 if __name__ == "__main__":
     main()
