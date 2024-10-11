@@ -6,6 +6,10 @@ from health_analyzer import HealthAnalyzer
 from search import KeywordSearch
 from app import APP
 
+from langsmith import Client
+
+client = Client()
+
 def main():
     load_config()
     

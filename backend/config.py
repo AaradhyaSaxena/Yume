@@ -7,7 +7,10 @@ def load_config():
             config = json.load(config_file)
         
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
-        os.environ["LANGCHAIN_API_KEY"] = config.get("LANGCHAIN_API_KEY", "")
+        os.environ["LANGCHAIN_PROJECT"] = "YuMe"
+        os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+        os.environ["LANGCHAIN_API_KEY"] = config.get("LANGSMITH_SERVICE_KEY", "")
+        os.environ["LANGSMITH_API_KEY"] = config.get("LANGSMITH_SERVICE_KEY", "")
         os.environ["GOOGLE_API_KEY"] = config.get("GEMINI_API_KEY", "")
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         os.environ["GROQ_API_KEY"] = config.get("GROQ_API_KEY", "")

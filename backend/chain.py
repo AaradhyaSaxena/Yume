@@ -8,8 +8,10 @@ from langchain.schema import AIMessage
 from vertexai.vision_models import ImageTextModel
 import io
 import PIL
+import logging
 
 from vertexai.preview.generative_models import GenerativeModel, Image
+from langsmith import traceable
 
 class Chain:
     def __init__(self, df):
@@ -27,6 +29,7 @@ class Chain:
     #     response = self.model.generate_content([prompt_image_summary, image])
     #     return response
 
+    @traceable(name="extract_nutritional_info_from_image")
     def extract_nutritional_info(self, image):
         img = PIL.Image.open(image)
         buffer = io.BytesIO()
@@ -70,7 +73,7 @@ class Chain:
         response = self.model.generate_content([prompt_nutritional_info, image])
         return response.text
     
-
+    @traceable(name="calculate_expenditure_in_excercise")
     def calculate_expenditure_in_excercise(self, calories):
         prompt_calculate_excercise = f"""
         Provide a rough estimate of the time required to burn {calories} calories for an average adult doing moderate-intensity exercise. 
@@ -86,6 +89,7 @@ class Chain:
         response = self.model.generate_content(prompt_calculate_excercise)
         return response.text
     
+    @traceable(name="extract_calories_info_from_image")
     def extract_calories_info(self, image):
         img = PIL.Image.open(image)
         buffer = io.BytesIO()
@@ -109,6 +113,7 @@ class Chain:
         return response.text
 
     #### TODO: update prompt for meal summary, make it more instructive
+    @traceable(name="assess_health_compatibility_final")    
     def assess_health_compatibility(self, health_record, nutritional_info, meals_summary, preferences, target_nutrients):
         prompt = ChatPromptTemplate.from_template(
             "Analyze the compatibility of a food product with a user's health profile and dietary habits. "
@@ -145,6 +150,7 @@ class Chain:
         })
     
     # Extract health summary from a health record
+    @traceable(name="get_health_summary")   
     def get_health_summary(self, health_record):
         prompt = ChatPromptTemplate.from_template(
             "Given the following health record, extract a concise summary of the patient's "
@@ -157,6 +163,7 @@ class Chain:
         return chain.invoke({"health_record": health_record})
     
     # Compute the daily calorie/ nutrient intake of the user from health record
+    @traceable(name="get_daily_intake")     
     def get_daily_intake(self, health_record):
         prompt = ChatPromptTemplate.from_template(
             "Given the following health record, using medical conditions, height, weight, age, gender, activity level, "
@@ -168,6 +175,7 @@ class Chain:
         chain = prompt | self.llm
         return chain.invoke({"health_record": health_record})
 
+    @traceable(name="assess_pros_cons_of_product_given_image")
     def assess_pros_cons(self, nutritional_info):
         prompt = ChatPromptTemplate.from_template(
             "Given the following nutritional information, "
@@ -181,40 +189,51 @@ class Chain:
         chain = prompt | self.llm
         return chain.invoke({"nutritional_info": nutritional_info})
 
+
+    @traceable(name="process_nutrition_and_health")
     def process_nutrition_and_health(self, image, user_id=None, meals_summary=None):
+        logging.info("Starting process_nutrition_and_health")
+
         nutritional_info = self.extract_nutritional_info(image)
+        logging.info(f"Extracted nutritional info: {nutritional_info}")
         
         if user_id is None or self.df.empty or 'user_id' not in self.df.columns:
-            print("Warning: Unable to retrieve health record. User ID is None or DataFrame is invalid.")
+            logging.warning("Unable to retrieve health record. User ID is None or DataFrame is invalid.")
             return None
 
         user_records = self.df.loc[self.df['user_id'] == user_id, 'health_record']
         if user_records.empty:
-            print(f"Warning: No health record found for user_id: {user_id}")
+            logging.warning(f"No health record found for user_id: {user_id}")
             health_record = "No health record available"
         else:
             health_record = user_records.iloc[0] if len(user_records) > 0 else "No health record available"
+        logging.info(f"Retrieved health record: {health_record}")
 
         user_preferences = self.df.loc[self.df['user_id'] == user_id, 'preferences']
         if user_preferences.empty:
-            print(f"Warning: No preferences found for user_id: {user_id}")
+            logging.warning(f"No preferences found for user_id: {user_id}")
             preferences = "No preferences available"
         else:
             preferences = user_preferences.iloc[0] if len(user_preferences) > 0 else "No preferences available"
+        logging.info(f"Retrieved preferences: {preferences}")
 
         user_target_nutrients = self.df.loc[self.df['user_id'] == user_id, 'target_nutrients']
         if user_target_nutrients.empty:
-            print(f"Warning: No target nutrients found for user_id: {user_id}")
+            logging.warning(f"No target nutrients found for user_id: {user_id}")
             target_nutrients = "No target nutrients available"
         else:
             target_nutrients = user_target_nutrients.iloc[0] if len(user_target_nutrients) > 0 else "No target nutrients available"
+        logging.info(f"Retrieved target nutrients: {target_nutrients}")
 
         recs = self.assess_health_compatibility(health_record, nutritional_info, meals_summary, preferences, target_nutrients)
         if isinstance(recs, AIMessage):
             recommendations_content = recs.content
         else:
             recommendations_content = recs 
-        return recommendations_content,nutritional_info
+        logging.info(f"Health compatibility assessment: {recommendations_content}")
+
+        logging.info("Completed process_nutrition_and_health")
+        return recommendations_content, nutritional_info
     
     def calculate_calories(self, image, user_id=None):
         nutritional_info = self.extract_calories_info(image)

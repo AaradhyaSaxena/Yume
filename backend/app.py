@@ -141,3 +141,4 @@ class APP:
 
     def run(self):
         self.app.run(port=self.port)
+        # self.app.run(debug=True, port=self.port)

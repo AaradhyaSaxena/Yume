@@ -1,4 +1,4 @@
 {
-    "BASE_URL": "https://4926-14-97-218-70.ngrok-free.app",
+    "BASE_URL": "http://127.0.0.1:5001",
     "PORT": 5001
 }

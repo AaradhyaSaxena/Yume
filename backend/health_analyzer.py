@@ -6,6 +6,9 @@ import base64
 from io import BytesIO
 import pandas as pd
 import json
+from langsmith import Client
+
+client = Client()
 
 class HealthAnalyzer:
     def __init__(self, chain, user_data):
@@ -116,7 +119,7 @@ class HealthAnalyzer:
         meals_summary = self.get_meals_summary_by_user(user_id)
         reccomendations, nutritional_info  = self.chain.process_nutrition_and_health(image_file, user_id, meals_summary)
         return {"result": reccomendations, "nutritional_info": nutritional_info}
-    
+
     def calculate_exercise(self, calories=None):
         return self.chain.calculate_exercise(calories)
     
