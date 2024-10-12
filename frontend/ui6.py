@@ -173,24 +173,27 @@ def dashboard_tab(user_id):
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
-    user_preferences = st.text_input("Enter Your Preferences (e.g., vegan, keto, etc.)")
+    # Change the text input to a file uploader for PDF files
+    uploaded_pdf = st.file_uploader("Upload your preferences document (PDF)", type=["pdf"])
     if st.button("Add Preferences"):
-        if user_preferences is None:
-            st.error("Please enter your preferences.")
+        if uploaded_pdf is None:
+            st.error("Please upload your preferences document.")
         elif not user_id:
             st.error("Please enter your User ID.")
         else:
             try:
-                data = {
-                    'user_id': user_id,
-                    'preferences': user_preferences
+                files = {
+                    'file': ('preferences.pdf', uploaded_pdf.getvalue(), 'application/pdf'),
                 }
-                headers = {'Content-Type': 'application/json'}
-                api_url = BASE_URL + "/preferences/"
-                response = requests.post(api_url, json=data, headers=headers)
+                data = {
+                    'user_id': user_id
+                }
+                headers = {'Content-Type': 'application/pdf'}
+                api_url = BASE_URL + "/health_sources/"
+                response = requests.post(api_url, files=files, data=data)
 
                 if response.status_code == 200:
-                    st.success(f"Preferences '{user_preferences}' added successfully!")
+                    st.success("Preferences document uploaded successfully!")
                 else:
                     st.error(f"Error {response.status_code}: {response.text}")
             except Exception as e:
