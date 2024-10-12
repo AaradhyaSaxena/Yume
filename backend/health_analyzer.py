@@ -6,6 +6,8 @@ import base64
 from io import BytesIO
 import pandas as pd
 import json
+import os
+from vectorStore import VectorStore
 
 class HealthAnalyzer:
     def __init__(self, chain, user_data):
@@ -158,3 +160,20 @@ class HealthAnalyzer:
             print(error_message)
             return {"error": error_message}
     
+    def upload_user_health_sources(self, user_id, file_content):
+        # Save the uploaded PDF content to a temporary file
+        temp_pdf_path = f"backend/{uuid.uuid4()}.pdf"
+        with open(temp_pdf_path, 'wb') as temp_file:
+            temp_file.write(file_content)
+
+        # Create a VectorStore instance
+        vector_store = VectorStore(temp_pdf_path, user_id)
+
+        # Add data to the vector store
+        vector_store.add_to_stores()
+
+        # Optionally, remove the temporary file after processing
+        os.remove(temp_pdf_path)
+
+        return {"message": "Health sources uploaded successfully"}
+

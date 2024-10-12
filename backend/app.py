@@ -8,7 +8,7 @@ class APP:
         self.search = search
         self.df = pd.read_csv('data/user_data.csv')
         self.config = self.load_config()
-        self.port = self.config.get('PORT', 5001)
+        self.port = self.config.get('PORT', 5005)
         self.setup_routes()
 
     def load_config(self):
@@ -101,6 +101,27 @@ class APP:
                 return jsonify(result)
             else:
                 return jsonify({"error": "Invalid file format. Please upload a .txt file"}), 400
+        
+         ### Upload User Health Record: Upload the health record of the user  
+        @self.app.route('/health_sources/', methods=['POST'])
+        def upload_user_health_sources():
+            if 'file' not in request.files:
+                return jsonify({"error": "No file provided"}), 400
+            
+            file = request.files['file']
+            user_id = request.form.get('user_id')
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            
+            if file and file.filename.endswith('.pdf'):
+                # Read the content of the PDF file
+                file_content = file.read()  # You may need to process the PDF content as needed
+                
+                # Pass the file content to the health analyzer (assuming a method exists for this)
+                result = self.health_analyzer.upload_user_health_sources(user_id, file_content)
+                return jsonify(result)
+            else:
+                return jsonify({"error": "Invalid file format. Please upload a .pdf file"}), 400
 
         ### Create User: Create a new user  
         @self.app.route('/user', methods=['POST'])
